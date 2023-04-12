@@ -1,0 +1,11 @@
+{
+  "application":
+    {"id": "6da176180198433683f3bcaa24e8573f",
+      "secret": "47f5eb88bccb48309670576e2d8ba6f7",
+      "scopes":"user-read-email user-read-private playlist-modify-private playlist-modify-public playlist-read-private app-remote-control playlist-read-collaborative",
+      "uri": "http://127.0.0.1:9090"
+    },
+  "account":{
+    "id": "yaaror"
+  }
+}
