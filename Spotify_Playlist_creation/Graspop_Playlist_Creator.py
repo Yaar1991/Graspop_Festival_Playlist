@@ -1,164 +1,86 @@
-import requests, json, base64, spotipy
+"""
+This script creates a Spotify playlist for the Graspop Festival.
+The playlist is created by adding the top tracks of the artists performing at the festival.
+If the playlist already exists, the script adds the top tracks of the new artists added to the festival.
+The Spotify access token is required to access Spotify's API.
+
+Functions:
+----------
+    - main():
+        This function is executed when the script is run. It gets the access token, creates the playlist,
+        gets the artists' names from the Graspop website, gets their top tracks, and adds them to the playlist.
+
+Modules:
+--------
+    - Graspop_Auth:
+        This module contains the function getToken() that returns the Spotify access token required to access Spotify's API.
+
+    - Graspop_Playlist:
+        This module contains the following functions:
+            - getPlaylistID(): Checks if the playlist already exists and returns its ID if it does.
+            - create_playlist(): Creates a new playlist and returns its ID.
+            - add_top_track_to_playlist(): Takes a list of artist names and access token, and returns a list of their top tracks.
+
+    - Graspop_Artists:
+        This module contains the following functions:
+            - get_artists_from_Festival(): Returns a list of artist names from the Graspop website.
+            - get_artist_id(): Takes an artist name and returns its Spotify ID.
+            - get_top_tracks(): Takes an artist ID and access token, and returns their top tracks.
+
+Note: This script was created on April 12, 2023, and requires an updated version of the Spotify API and Python 3.x.
+"""
+
+import json, spotipy, Graspop_Auth, Graspop_Artists,Graspop_Playlist
 from spotipy.oauth2 import SpotifyOAuth
-from bs4 import BeautifulSoup
+
 
 ## Variables
+
+with open('config.json') as f:
+    config=json.load(f)
+
 # Graspop Variables
 Graspop_URL = 'https://www.graspop.be/en/line-up/lijst'
 
 # Spotify API endpoints
-URLAuthBase = 'https://accounts.spotify.com'
 SPOTIFY_API_URL = 'https://api.spotify.com/v1/'
-URLAuth = '/authorize'
-URLToken = '/api/token'
+
 
 # Spotify Application credentials
-Client_id = 'APPS-CLIENT-ID'
-Client_secret = '<APPS-CLIENT-SECRET>'
+Client_id = config['application']['id']
+Client_secret = config['application']['secret']
 
 # User's Spotify ID and Access Token
-USER_ID = '<YOUR-USER-ID>'
+USER_ID = config['account']['id']
 ACCESS_TOKEN = None
 
 # Artist's Names
-Artist_Name = input("Enter Artist names: ")
+ArtistName = lambda: input("Enter Artist names: ")
 
 # Spotify Application parameters
-PLAYLIST_ID = input("If you already have a playlist, put it here: ")
-scopes = 'user-read-email user-read-private playlist-modify-private playlist-modify-public playlist-read-private ' \
-         'app-remote-control playlist-read-collaborative'
+scopes = config['application']['scopes']
 encodingType = 'application/x-www-form-urlencoded'
-URIList = []
 
-
-redirect_uri = 'http://127.0.0.1:9090'
-grantType = 'client_credentials'
-baseString64 = None
+redirect_uri = config['application']['uri']
 HeadersAuth = None
-ParamsAuth = None
 
-# Get Spotipy Object
+# Create Spotipy Object
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=Client_id,
                                                client_secret=Client_secret,
                                                redirect_uri=redirect_uri,
                                                scope=scopes))
 
 
-# Get Access Token
-def getToken():
-    baseString64=Client_id + ':' + Client_secret
-    baseString64=base64.b64encode(baseString64.encode("ascii")).decode("ascii")
-    ID_Sec_64=base64.b64encode((Client_id + ':' + Client_secret).encode('ascii')).decode('ascii')
-    HeadersAuth = {'Authorization': 'Basic ' + ID_Sec_64}
-    bodyToken = {'grant_type':grantType}
-
-    res=requests.request(method='POST', url = URLAuthBase+URLToken,headers=HeadersAuth,data=bodyToken)
-    if res.status_code == 200:
-        token = res.json().get('access_token')
-        return token
-    else:
-        print("status code isn't 200")
-        raise Exception
-
-# Search the Artist and get their ID:
-def get_artist_id(artist_name):
-    search_url = f"{SPOTIFY_API_URL}search?q={artist_name}&type=artist&limit=1"
-    headers = {'Authorization': f'Bearer {ACCESS_TOKEN}'}
-
-    response = requests.get(search_url, headers=headers)
-    response_json = response.json()
-    artist_id = response_json['artists']['items'][0]['id']
-
-    return artist_id
-
-# Search Artist's top song:
-def get_top_tracks(artist_id):
-    top_tracks_url = f"{SPOTIFY_API_URL}artists/{artist_id}/top-tracks?country=US"
-    headers = {'Authorization': f'Bearer {ACCESS_TOKEN}'}
-
-    response = requests.get(top_tracks_url, headers=headers)
-    response_json = response.json()
-    top_tracks = response_json['tracks']
-
-    return top_tracks
-
-# Create a new playlist
-def create_playlist(playlist_name):
-    # playlist_url = f"{SPOTIFY_API_URL}users/{USER_ID}/playlists"
-    # headers = {'Authorization': f'Bearer {ACCESS_TOKEN}', 'Content-Type': 'application/json'}
-
-    # data = {'name': playlist_name, 'public': True}
-    user_id=sp.me()['id']
-    # playlists = sp.current_user_playlists()
-    playlist_idd=sp.user_playlist_create(user_id,playlist_name)
-    # response = requests.post(playlist_url, headers=headers, data=json.dumps(data))
-
-    # response_json = response.json()
-    # playlist_id = response_json['id']
-
-    return playlist_idd
-
-# Add the most played song to the playlist
-def add_song_to_playlist(playlist, track_id):
-    playlist_id = playlist['id']
-    add_track_url = f"{SPOTIFY_API_URL}playlists/{playlist_id}/tracks"
-    headers = {'Authorization': f'Bearer {ACCESS_TOKEN}', 'Content-Type': 'application/json'}
-    uri = f"spotify:track:{track_id}"
-
-    data = {'uris': [f"spotify:track:{track_id}"]}
-
-
-    response = requests.post(add_track_url, headers=headers, data=json.dumps(data))
-
-    response_json = response.json()
-    snapshot_id = response_json['snapshot_id']
-
-    return snapshot_id
-
-# Add the top track of the Artist to the playlist
-def add_top_track_to_playlist(Artists_Name):
-    # : Artists_Name is a list of Artists
-    # : PLAYLIST_ID is the Playlist ID
-
-    for Artist_Name in Artists_Name:
-        # Get Artist ID:
-        artistID = get_artist_id(Artist_Name)
-
-        # Get Top Tracks of the Artist
-        top_tracks = get_top_tracks(artistID)
-
-        # Get the most played track of the artist:
-        TRACK_ID=max(top_tracks, key=lambda x: x['popularity'])['id']
-
-        # Add Top Tracks of the Artist to the Tracks URI
-        URIList.append(f"spotify:track:{TRACK_ID}")
-
-    return URIList;
-
-
-def get_artists(Graspop_URL): # Dafna Libis :C:
-    response = requests.get(Graspop_URL)
-
-    # Parse the HTML content using Beautiful Soup
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Extract all the data from the selector
-    data = []
-    for item in soup.select(".artist__name"):
-        data.append(item.text)
-    return data
-
-
 if __name__ == '__main__':
     # Get Access Token
-    ACCESS_TOKEN = getToken()
+    ACCESS_TOKEN = Graspop_Auth.getToken()
 
-    if PLAYLIST_ID:
+    if Graspop_Playlist.getPlaylistID():
         # Getting the artists name from Graspop Website
-        PLAYLIST = create_playlist("Graspop 2023 - Warming Up")
-        Artists_names = get_artists(Graspop_URL)
+        PLAYLIST = Graspop_Playlist.create_playlist(sp,"Graspop 2023 - Warming Up")
+        Artists_names = Graspop_Artists.get_artists_from_Festival(Graspop_URL)
         # Getting the artists' top tracks and putting them in a list
-        Song_List = add_top_track_to_playlist(Artists_names)
+        Song_List = Graspop_Playlist.add_top_track_to_playlist(Artists_names,ACCESS_TOKEN)
 
         # There is a limitation for sending 100 songs per request,
         # so we divide it to the first 100, and from the 100th object
@@ -169,20 +91,16 @@ if __name__ == '__main__':
                        sp.playlist_add_items(PLAYLIST['id'], Song_List[99:])]
     else:
         # Get Artist ID:
-        artistID = get_artist_id(Artist_Name)
-
+        artistID = Graspop_Artists.get_artist_id(ArtistName())
         # Create a Playlist
-        PLAYLIST_ID = create_playlist("Graspop 2023 - Warming Up")
+        PLAYLIST_ID = Graspop_Playlist.create_playlist("Graspop 2023 - Warming Up")
         print(PLAYLIST_ID['id'])
         # Get Top Tracks of the Artist
-        top_tracks = get_top_tracks(artistID)
-
+        top_tracks = Graspop_Artists.get_top_tracks(artistID,ACCESS_TOKEN)
         # Get the most played track of the artist:
         TRACK_ID=max(top_tracks, key=lambda x: x['popularity'])['id']
         uri = [f"spotify:track:{TRACK_ID}"]
-
         # Add Top Tracks of the Artist to the Playlist
-        #args = get_args(uri,PLAYLIST_ID)
         snapshot_id = sp.playlist_add_items(PLAYLIST_ID['id'], uri)
 
         print(PLAYLIST_ID['id'])
