@@ -8,20 +8,20 @@ import base64,requests, json
 with open('config.json') as f:
     config=json.load(f)
 
-Client_id = config['application']['id']
-Client_secret = config['application']['secret']
+client_id = config['application']['id']
+client_secret = config['application']['secret']
 grantType = 'client_credentials'
 
 # Spotify API endpoints`
-URLAuthBase = 'https://accounts.spotify.com'
-URLToken = '/api/token'
+url_auth_base = 'https://accounts.spotify.com'
+url_token = '/api/token'
 
-def getToken():
-    ID_Sec_64=base64.b64encode((Client_id + ':' + Client_secret).encode('ascii')).decode('ascii')
-    HeadersAuth = {'Authorization': 'Basic ' + ID_Sec_64}
-    bodyToken = {'grant_type':grantType}
+def get_token():
+    id_sec_64=base64.b64encode((client_id + ':' + client_secret).encode('ascii')).decode('ascii')
+    headers_auth = {'Authorization': 'Basic ' + id_sec_64}
+    body_token = {'grant_type':grantType}
 
-    res=requests.request(method='POST', url = URLAuthBase+URLToken,headers=HeadersAuth,data=bodyToken)
+    res=requests.request(method='POST', url = url_auth_base+url_token,headers=headers_auth,data=body_token)
     if res.status_code == 200:
         token = res.json().get('access_token')
         return token

@@ -1,8 +1,8 @@
 import requests,json
-from Spotify_Playlist_creation import Graspop_Artists
+from Spotify_Playlist_creation import graspop_artists
 
 
-def getPlaylistID():
+def get_playlist_id():
     """
     Prompts the user for input to determine whether they already have a Spotify playlist ID, and if so, returns that ID as a string. If the user does not have a playlist or chooses not to provide an ID, None is returned.
 
@@ -11,14 +11,14 @@ def getPlaylistID():
     str or None
         The Spotify playlist ID entered by the user, or None if no ID is provided.
     """
-    is_PLAYLIST = input("Do you have a Playlist?")
-    if is_PLAYLIST == 'Yes':
-        PLAYLIST_ID = input("If you already have a playlist, put its ID here: ")
+    is_playlist = input("Do you have a Playlist?")
+    if is_playlist == 'Yes':
+        playlist_id = input("If you already have a playlist, put its ID here: ")
     else:
-        PLAYLIST_ID = None
-    return PLAYLIST_ID
+        playlist_id = None
+    return playlist_id
 
-def create_playlist(SP_Object,playlist_name):
+def create_playlist(sp_object,playlist_name):
     """
     Creates a new Spotify playlist with the given name, belonging to the current user, using the Spotify Web API.
 
@@ -32,19 +32,19 @@ def create_playlist(SP_Object,playlist_name):
     str
         The unique ID of the newly created playlist, as returned by the Spotify API.
     """
-    user_id = SP_Object.me()['id']
-    playlist_id = SP_Object.user_playlist_create(user_id, playlist_name)
+    user_id = sp_object.me()['id']
+    playlist_id = sp_object.user_playlist_create(user_id, playlist_name)
     return playlist_id
 
-def add_top_track_to_playlist(Artists_Name, ACCESS_TOKEN):
+def add_top_track_to_playlist(artists_name, access_token):
     """
     Given a list of artist names, finds the top track for each artist and adds it to a Spotify playlist.
 
     Parameters:
     -----------
-    Artists_Name : list of str
+    artists_name : list of str
         A list of artist names to search for and add to the playlist.
-    ACCESS_TOKEN : str
+    access_token : str
         A valid Spotify access token to authorize the API requests.
 
     Returns:
@@ -52,40 +52,40 @@ def add_top_track_to_playlist(Artists_Name, ACCESS_TOKEN):
     list of str
         A list of Spotify track URIs, one for each top track found and added to the playlist.
     """
-    URIList = []
-    for Artist_Name in Artists_Name:
+    url_list = []
+    for artist_name in artists_name:
         # Get Artist ID:
-        artistID = Graspop_Artists.get_artist_id(Artist_Name, ACCESS_TOKEN)
+        artist_id = graspop_artists.get_artist_id(artist_name, access_token)
 
         # Get Top Tracks of the Artist
-        top_tracks = Graspop_Artists.get_top_tracks(artistID, ACCESS_TOKEN)
+        top_tracks = graspop_artists.get_top_tracks(artist_id, access_token)
 
         # Get the most played track of the artist:
-        TRACK_ID = max(top_tracks, key=lambda x: x['popularity'])['id']
+        track_id = max(top_tracks, key=lambda x: x['popularity'])['id']
 
         # Add Top Tracks of the Artist to the Tracks URI
-        URIList.append(f"spotify:track:{TRACK_ID}")
+        url_list.append(f"spotify:track:{track_id}")
 
-    return URIList
+    return url_list
 
 
 
-def add_song_to_playlist(playlist, track_id, ACCESS_TOKEN, SPOTIFY_API_URL):
+def add_song_to_playlist(playlist, track_id, access_token, spotify_api_url):
     """
     Adds a track with the given track ID to the specified playlist.
 
     Args:
     - playlist: a dictionary representing the playlist to which the track should be added. The dictionary should have an 'id' key with the value of the playlist ID.
     - track_id: a string representing the track ID of the track to add.
-    - ACCESS_TOKEN: a string representing the access token for accessing the Spotify API.
-    - SPOTIFY_API_URL: a string representing the base URL for the Spotify API.
+    - access_token: a string representing the access token for accessing the Spotify API.
+    - spotify_api_url: a string representing the base URL for the Spotify API.
 
     Returns:
     - snapshot_id: a string representing the snapshot ID of the updated playlist.
     """
     playlist_id = playlist['id']
-    add_track_url = f"{SPOTIFY_API_URL}playlists/{playlist_id}/tracks"
-    headers = {'Authorization': f'Bearer {ACCESS_TOKEN}', 'Content-Type': 'application/json'}
+    add_track_url = f"{spotify_api_url}playlists/{playlist_id}/tracks"
+    headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
     uri = f"spotify:track:{track_id}"
     data = {'uris': [uri]}
     response = requests.post(add_track_url, headers=headers, data=json.dumps(data))
