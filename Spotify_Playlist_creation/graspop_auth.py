@@ -10,7 +10,7 @@ with open('config.json') as f:
 
 client_id = config['application']['id']
 client_secret = config['application']['secret']
-grantType = 'client_credentials'
+grant_type = 'client_credentials'
 
 # Spotify API endpoints`
 url_auth_base = 'https://accounts.spotify.com'
@@ -19,8 +19,7 @@ url_token = '/api/token'
 def get_token():
     id_sec_64=base64.b64encode((client_id + ':' + client_secret).encode('ascii')).decode('ascii')
     headers_auth = {'Authorization': 'Basic ' + id_sec_64}
-    body_token = {'grant_type':grantType}
-
+    body_token = {'grant_type':grant_type}
     res=requests.request(method='POST', url = url_auth_base+url_token,headers=headers_auth,data=body_token)
     if res.status_code == 200:
         token = res.json().get('access_token')
