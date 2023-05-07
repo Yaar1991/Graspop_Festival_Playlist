@@ -1,8 +1,9 @@
 import requests,json
+from typing import Union, Optional
 from Spotify_Playlist_creation import graspop_artists
 
 
-def get_playlist_id():
+def get_playlist_id() -> Union[str,None]:
     """
     Prompts the user for input to determine whether they already have a Spotify playlist ID, and if so, returns that ID as a string. If the user does not have a playlist or chooses not to provide an ID, None is returned.
 
@@ -11,14 +12,14 @@ def get_playlist_id():
     str or None
         The Spotify playlist ID entered by the user, or None if no ID is provided.
     """
-    is_playlist = input("Do you have a Playlist?")
-    if is_playlist == 'Yes':
+    is_playlist = input("Do you have a Playlist? ")
+    if is_playlist == 'Yes' or is_playlist=='yes':
         playlist_id = input("If you already have a playlist, put its ID here: ")
     else:
         playlist_id = None
     return playlist_id
 
-def create_playlist(sp_object,playlist_name):
+def create_playlist(sp_object: object,playlist_name: str,playList_not_null: Optional[str] = None) -> str:
     """
     Creates a new Spotify playlist with the given name, belonging to the current user, using the Spotify Web API.
 
@@ -33,10 +34,13 @@ def create_playlist(sp_object,playlist_name):
         The unique ID of the newly created playlist, as returned by the Spotify API.
     """
     user_id = sp_object.me()['id']
-    playlist_id = sp_object.user_playlist_create(user_id, playlist_name)
+    if(playlist_name != None):
+        playlist_id = playList_not_null
+    else:
+        playlist_id = sp_object.user_playlist_create(user_id, input("What's your Festival name? "))
     return playlist_id
 
-def add_top_track_to_playlist(artists_name, access_token):
+def add_top_track_to_playlist(artists_name: list[str], access_token: str) -> list[str]:
     """
     Given a list of artist names, finds the top track for each artist and adds it to a Spotify playlist.
 
@@ -70,7 +74,7 @@ def add_top_track_to_playlist(artists_name, access_token):
 
 
 
-def add_song_to_playlist(playlist, track_id, access_token, spotify_api_url):
+def add_song_to_playlist(playlist: dict, track_id: str, access_token: str, spotify_api_url: str) -> str:
     """
     Adds a track with the given track ID to the specified playlist.
 

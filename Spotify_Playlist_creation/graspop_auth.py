@@ -16,7 +16,7 @@ grant_type = 'client_credentials'
 url_auth_base = 'https://accounts.spotify.com'
 url_token = '/api/token'
 
-def get_token():
+def get_token() -> str:
     id_sec_64=base64.b64encode((client_id + ':' + client_secret).encode('ascii')).decode('ascii')
     headers_auth = {'Authorization': 'Basic ' + id_sec_64}
     body_token = {'grant_type':grant_type}

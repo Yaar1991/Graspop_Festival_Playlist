@@ -1,15 +1,9 @@
-#  Copyright (c) 2023. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-#  Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
-#  Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
-#  Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
-#  Vestibulum commodo. Ut rhoncus gravida arcu.
-
 import requests, json
 from bs4 import BeautifulSoup
 
 spotify_api_url = 'https://api.spotify.com/v1/'
 
-def get_artist_id(artist_name, access_token):
+def get_artist_id(artist_name:str, access_token:str) -> str:
     """
     Searches the Spotify API for an artist by name and returns the Spotify ID of the top result.
 
@@ -17,7 +11,7 @@ def get_artist_id(artist_name, access_token):
     -----------
     artist_name : str
         The name of the artist to search for.
-    ACCESS_TOKEN : str
+    access_token : str
         A valid Spotify access token to authorize the API request.
 
     Returns:
@@ -33,7 +27,7 @@ def get_artist_id(artist_name, access_token):
 
     return artist_id
 
-def get_top_tracks(artist_id,access_token):
+def get_top_tracks(artist_id: str,access_token: str) -> list[dict]:
     """
     Returns a list of the top tracks for a given Spotify artist ID, as determined by Spotify's algorithm based on popularity in the US.
 
@@ -54,7 +48,7 @@ def get_top_tracks(artist_id,access_token):
     top_tracks = response_json['tracks']
     return top_tracks
 
-def get_artists_from_festival(graspop_url):
+def get_artists_from_festival(graspop_url: str) -> list[str]:
     """
     Extracts the names of all artists performing at a festival from the provided graspop_url.
 

@@ -76,22 +76,22 @@ if __name__ == '__main__':
     access_token = graspop_auth.get_token()
     playList_not_null=graspop_playlist.get_playlist_id()
     if playList_not_null:
-        playlist = graspop_playlist.create_playlist(sp,playList_not_null)
+        #playlist = graspop_playlist.create_playlist(sp,playList_not_null)
         artists_names = graspop_artists.get_artists_from_festival(graspop_url)
         song_list = graspop_playlist.add_top_track_to_playlist(artists_names,access_token)
 
         # There is a limitation for sending 100 songs per request,
         # so we divide it to the first 100, and from the 100th object
         # to the last object:
-
-        snapshot_id = [sp.playlist_add_items(playlist['id'], song_list[:99]),
-                       sp.playlist_add_items(playlist['id'], song_list[99:])]
+        playlist = {"id": playList_not_null}
+        snapshot_id = [sp.user_playlist_add_tracks(user_id,playList_not_null, song_list[:99]),
+                       sp.user_playlist_add_tracks(user_id,playList_not_null, song_list[99:],position=100)]
     else:
         artist_id = graspop_artists.get_artist_id(artist_name(),access_token)
-        playlist_id = graspop_playlist.create_playlist(sp,"Graspop 2023 - Warming Up")
+        playlist = graspop_playlist.create_playlist(sp,None)
         top_tracks = graspop_artists.get_top_tracks(artist_id,access_token)
         track_id=max(top_tracks, key=lambda x: x['popularity'])['id']
         uri = [f"spotify:track:{track_id}"]
-        snapshot_id = sp.playlist_add_items(playlist_id['id'], uri)
-        print(playlist_id['id'])
-    print(playlist_id['id'])
+        snapshot_id = sp.playlist_add_items(playlist['id'], uri)
+        print(playlist['id'])
+    print(playlist['id'])
