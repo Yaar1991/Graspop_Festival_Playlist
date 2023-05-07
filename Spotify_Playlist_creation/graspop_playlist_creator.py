@@ -1,33 +1,55 @@
 """
-This script creates a Spotify playlist for the Graspop Festival.
-The playlist is created by adding the top tracks of the artists performing at the festival.
-If the playlist already exists, the script adds the top tracks of the new artists added to the festival.
-The Spotify access token is required to access Spotify's API.
+This script interacts with the Spotify API to create a playlist and add top tracks of artists who are performing in Graspop Metal Meeting festival. It uses the Spotipy library to authenticate the user's Spotify account and perform the necessary actions.
+
+The script reads from a JSON configuration file that contains the credentials and settings required to interact with the Spotify API.
 
 Functions:
-----------
-    - main():
-        This function is executed when the script is run. It gets the access token, creates the playlist,
-        gets the artists' names from the Graspop website, gets their top tracks, and adds them to the playlist.
 
-Modules:
---------
-    - graspop_auth:
-        This module contains the function get_token() that returns the Spotify access token required to access Spotify's API.
+No explicit functions are defined in this script. Instead, it imports and uses functions from other modules that are defined in the following files:
 
-    - graspop_playlist:
-        This module contains the following functions:
-            - get_playlist_id(): Checks if the playlist already exists and returns its ID if it does.
-            - create_playlist(): Creates a new playlist and returns its ID.
-            - add_top_track_to_playlist(): Takes a list of artist names and access token, and returns a list of their top tracks.
+graspop_auth.py: Contains a function to authenticate with the Spotify API and retrieve an access token.
 
-    - graspop_artists:
-        This module contains the following functions:
-            - get_artists_from_festival(): Returns a list of artist names from the Graspop website.
-            - get_artist_id(): Takes an artist name and returns its Spotify ID.
-            - get_top_tracks(): Takes an artist ID and access token, and returns their top tracks.
+graspop_artists.py: Contains functions to extract the artist names and top tracks from the Graspop festival website, as well as to get the artist ID from the Spotify API.
 
-Note: This script was created on April 12, 2023, and requires an updated version of the Spotify API and Python 3.x.
+graspop_playlist.py: Contains functions to create a new playlist, retrieve an existing playlist, add tracks to a playlist, and check if a playlist is empty.
+
+:parameter:
+
+config (dict): A dictionary that contains the Spotify application credentials and user account ID.
+
+graspop_url (str): A string that contains the URL of the Graspop festival website.
+
+spotify_api_url (str): A string that contains the base URL of the Spotify API.
+
+client_id (str): A string that contains the client ID of the Spotify application.
+
+client_secret (str): A string that contains the client secret of the Spotify application.
+
+user_id (str): A string that contains the user ID of the Spotify account.
+
+access_token (str): A string that contains the access token of the authenticated user.
+
+artist_name (lambda function): A lambda function that prompts the user to enter the artist names.
+
+scopes (list): A list of strings that contains the Spotify API scopes required by the application.
+
+encoding_type (str): A string that contains the content type of the HTTP requests.
+
+redirect_uri (str): A string that contains the redirect URI of the Spotify application.
+
+headers_auth (None): A None value that will be used to store the authentication headers.
+
+sp (Spotipy object): A Spotipy object that is used to interact with the Spotify API.
+
+playList_not_null (str): A string that contains the ID of an existing playlist.
+
+artists_names (list): A list of strings that contains the names of the artists performing in the Graspop festival.
+
+song_list (list): A list of strings that contains the top tracks of the artists in the Graspop festival.
+
+playlist (dict): A dictionary that contains the ID of the created playlist.
+
+snapshot_id (list): A list of strings that contains the snapshot ID of the updated playlist.
 """
 
 import json, spotipy, graspop_auth, graspop_artists,graspop_playlist
