@@ -132,3 +132,4 @@ def get_artists_from_festival(festival_url: str) -> list[str]:
             for j in range(0, len(bandit[i])):
                 data.append(bandit[i][j])
     return data
+
