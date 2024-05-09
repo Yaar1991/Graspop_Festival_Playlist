@@ -1,9 +1,9 @@
-import requests,json
+import requests, json
 from typing import Union, Optional
-from Spotify_Playlist_creation import graspop_artists
+from Spotify_Playlist_creation_folder import graspop_artists
 
 
-def get_playlist_id() -> Union[str,None]:
+def get_playlist_id() -> Union[str, None]:
     """
     The get_playlist_id() function prompts the user to enter whether they already have a playlist or not. If the user answers with "Yes" or "yes", the function prompts the user to enter the ID of the playlist. Otherwise, the function returns None. The function returns a string or None.
 
@@ -13,13 +13,14 @@ def get_playlist_id() -> Union[str,None]:
     The function takes no arguments and returns a string or None.
     """
     is_playlist = input("Do you have a Playlist? ")
-    if is_playlist == 'Yes' or is_playlist=='yes':
+    if is_playlist == 'Yes' or is_playlist == 'yes':
         playlist_id = input("If you already have a playlist, put its ID here: ")
     else:
         playlist_id = None
     return playlist_id
 
-def create_playlist(sp_object: object,playlist_name: str,playList_not_null: Optional[str] = None) -> str:
+
+def create_playlist(sp_object: object, playlist_name: str, playList_not_null: Optional[str] = None) -> str:
     """
     The create_playlist() function creates a new playlist or uses an existing one. If playlist_name is not None,
     the function attempts to use playList_not_null as the ID of an existing playlist. Otherwise, the function creates
@@ -34,11 +35,12 @@ def create_playlist(sp_object: object,playlist_name: str,playList_not_null: Opti
     of an existing playlist. The function returns a string.
     """
     user_id = sp_object.me()['id']
-    if(playlist_name != None):
-        playlist_id = playList_not_null
+    if playlist_name:
+        return playList_not_null
     else:
-        playlist_id = sp_object.user_playlist_create(user_id, input("What's your Festival name? "))
-    return playlist_id
+        playlist_ = sp_object.user_playlist_create(user_id, input("What's your Playlist name? "))
+        return playlist_
+
 
 def add_top_track_to_playlist(artists_name: list[str], access_token: str) -> list[str]:
     """
@@ -60,6 +62,8 @@ def add_top_track_to_playlist(artists_name: list[str], access_token: str) -> lis
     for artist_name in artists_name:
         # Get Artist ID:
         artist_id = graspop_artists.get_artist_id(artist_name, access_token)
+        if artist_id == '6hYrMIagu9UiIJc7bME1gX' or artist_id == '1Un7KYp1I6P29gkp9u9Bhh':
+            continue
 
         # Get Top Tracks of the Artist
         top_tracks = graspop_artists.get_top_tracks(artist_id, access_token)
@@ -71,7 +75,6 @@ def add_top_track_to_playlist(artists_name: list[str], access_token: str) -> lis
         url_list.append(f"spotify:track:{track_id}")
 
     return url_list
-
 
 
 def add_song_to_playlist(playlist: dict, track_id: str, access_token: str, spotify_api_url: str) -> str:
